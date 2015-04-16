@@ -1,0 +1,55 @@
+apply plugin: 'war'
+// El plugin de eclipse no funciona junto con el de appengine. Esta arreglado pero va a ser liberado en la 1.9.19
+// https://github.com/GoogleCloudPlatform/gradle-appengine-plugin/issues/174
+//apply plugin: 'eclipse-wtp'
+apply plugin: 'appengine'
+apply plugin: 'maven'
+
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+
+	dependencies {
+		classpath 'com.google.appengine:gradle-appengine-plugin:1.9.18'
+	}
+}
+
+sourceCompatibility = 1.7
+version = '0.1-SNAPSHOT'
+group = 'com.aajtech.hr'
+
+def appengineVersion = "1.9.18"
+
+repositories {
+	mavenLocal()
+	mavenCentral()
+	maven {
+		url "http://maven.vaadin.com/vaadin-addons"
+	}
+}
+	
+dependencies {
+	appengineSdk "com.google.appengine:appengine-java-sdk:${appengineVersion}"
+	compile "com.google.appengine:appengine-api-1.0-sdk:${appengineVersion}"
+	compile 'com.google.inject.extensions:guice-servlet:3.0'
+	compile 'com.google.inject:guice:3.0:no_aop'
+	compile 'com.google.guava:guava:18.0'
+	compile 'com.google.code.findbugs:jsr305:2.0.3'
+	compile 'com.vaadin.addon:jpacontainer:3.2.0'
+	compile 'com.vaadin.addon:vaadin-touchkit-agpl:4.0.1'
+	compile 'com.vaadin:vaadin-client-compiled:7.4.3'
+	compile 'com.vaadin:vaadin-server:7.4.3'
+	compile 'javax.inject:javax.inject:1'
+	compile "javax.servlet:servlet-api:2.5"
+	compile 'org.apache.geronimo.specs:geronimo-jpa_2.0_spec:1.1'
+}
+
+appengine {
+	httpPort = 8888
+	downloadSdk = true
+	appcfg {
+		noCookies = true
+		oauth2 = true
+	}
+}
