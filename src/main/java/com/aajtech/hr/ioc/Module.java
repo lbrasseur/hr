@@ -7,22 +7,27 @@ import javax.persistence.Persistence;
 import com.aajtech.hr.ui.HrUiProvider;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import com.google.inject.servlet.SessionScoped;
+import com.vaadin.addon.touchkit.ui.NavigationManager;
 import com.vaadin.server.UIProvider;
 
 public class Module extends AbstractModule {
-    @Override
-    protected void configure() {
-        // UI
-        bind(UIProvider.class).to(HrUiProvider.class);
+	@Override
+	protected void configure() {
+		requestStaticInjection(SerializableProvider.class);
 
-        // Business
-        
-        // Services
-    }
+		// UI
+		bind(UIProvider.class).to(HrUiProvider.class);
+		bind(NavigationManager.class).in(SessionScoped.class);
 
-    @Provides
-    @Singleton
-    public EntityManagerFactory getEntityManagerFactory() {
-        return Persistence.createEntityManagerFactory("Hr");
-    }
+		// Business
+
+		// Services
+	}
+
+	@Provides
+	@Singleton
+	public EntityManagerFactory getEntityManagerFactory() {
+		return Persistence.createEntityManagerFactory("HR");
+	}
 }

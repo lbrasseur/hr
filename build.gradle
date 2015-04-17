@@ -1,7 +1,5 @@
 apply plugin: 'war'
-// El plugin de eclipse no funciona junto con el de appengine. Esta arreglado pero va a ser liberado en la 1.9.19
-// https://github.com/GoogleCloudPlatform/gradle-appengine-plugin/issues/174
-//apply plugin: 'eclipse-wtp'
+apply plugin: 'eclipse-wtp'
 apply plugin: 'appengine'
 apply plugin: 'maven'
 
@@ -11,7 +9,7 @@ buildscript {
 	}
 
 	dependencies {
-		classpath 'com.google.appengine:gradle-appengine-plugin:1.9.18'
+		classpath 'com.google.appengine:gradle-appengine-plugin:1.9.19'
 	}
 }
 
@@ -19,7 +17,8 @@ sourceCompatibility = 1.7
 version = '0.1-SNAPSHOT'
 group = 'com.aajtech.hr'
 
-def appengineVersion = "1.9.18"
+def appengineVersion = "1.9.19"
+def vaadinVersion = "7.4.4"
 
 repositories {
 	mavenLocal()
@@ -29,6 +28,41 @@ repositories {
 	}
 }
 	
+appengine {
+	httpPort = 8888
+	downloadSdk = true
+	appcfg {
+		noCookies = true
+		oauth2 = true
+	}
+	/*
+	enhancer {
+		version = "v2"
+		api = "jpa"
+		enhanceOnBuild = true
+	}
+	*/
+}
+
+configurations {
+	enhance {
+ 		extendsFrom compile
+ 	}
+}
+
+task jpaEnhance << {
+    ant.taskdef(name: 'enhancer', classname: 'org.datanucleus.enhancer.tools.EnhancerTask', classpath: configurations.enhance.asPath) 
+	ant.enhancer(dir: sourceSets.main.output.classesDir.canonicalPath.toString(), verbose: 'true') {
+		classpath {
+			pathelement(location: sourceSets.main.output.classesDir.canonicalPath.toString())
+			pathelement(path: configurations.enhance.asPath)
+		}
+		fileset(dir: sourceSets.main.output.classesDir.canonicalPath.toString()) {
+			include(name: '**/*.class')
+		}
+	}
+}
+
 dependencies {
 	appengineSdk "com.google.appengine:appengine-java-sdk:${appengineVersion}"
 	compile "com.google.appengine:appengine-api-1.0-sdk:${appengineVersion}"
@@ -38,18 +72,11 @@ dependencies {
 	compile 'com.google.code.findbugs:jsr305:2.0.3'
 	compile 'com.vaadin.addon:jpacontainer:3.2.0'
 	compile 'com.vaadin.addon:vaadin-touchkit-agpl:4.0.1'
-	compile 'com.vaadin:vaadin-client-compiled:7.4.3'
-	compile 'com.vaadin:vaadin-server:7.4.3'
+	compile "com.vaadin:vaadin-client-compiled:${vaadinVersion}"
+	compile "com.vaadin:vaadin-server:${vaadinVersion}"
 	compile 'javax.inject:javax.inject:1'
 	compile "javax.servlet:servlet-api:2.5"
-	compile 'org.apache.geronimo.specs:geronimo-jpa_2.0_spec:1.1'
-}
-
-appengine {
-	httpPort = 8888
-	downloadSdk = true
-	appcfg {
-		noCookies = true
-		oauth2 = true
-	}
+	compile 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final'
+	compile 'org.datanucleus:datanucleus-accessplatform-jpa-rdbms:4.1.0-m3'
+	enhance 'org.datanucleus:datanucleus-enhancer:3.1.1'
 }
