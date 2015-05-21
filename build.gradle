@@ -29,45 +29,60 @@ repositories {
 }
 	
 appengine {
-	httpPort = 8888
+	httpPort = 8080
 	downloadSdk = true
 	appcfg {
 		noCookies = true
 		oauth2 = true
 	}
-	/*
 	enhancer {
 		version = "v2"
 		api = "jpa"
 		enhanceOnBuild = true
 	}
-	*/
 }
 
-configurations {
-	enhance {
- 		extendsFrom compile
- 	}
-}
+task datanucleusEnhance {
+    description "Enhance JPA model classes using DataNucleus Enhancer"
+    dependsOn compileJava
 
-task jpaEnhance << {
-    ant.taskdef(name: 'enhancer', classname: 'org.datanucleus.enhancer.tools.EnhancerTask', classpath: configurations.enhance.asPath) 
-	ant.enhancer(dir: sourceSets.main.output.classesDir.canonicalPath.toString(), verbose: 'true') {
-		classpath {
-			pathelement(location: sourceSets.main.output.classesDir.canonicalPath.toString())
-			pathelement(path: configurations.enhance.asPath)
-		}
-		fileset(dir: sourceSets.main.output.classesDir.canonicalPath.toString()) {
-			include(name: '**/*.class')
-		}
-	}
+    doLast {    
+        // define the entity classes
+        def entityFiles = fileTree(sourceSets.main.output.classesDir).matching {
+            include 'com/aajtech/hr/model/*.class'
+        }
+
+        println "Enhancing with DataNucleus the following files"
+        entityFiles.getFiles().each {
+            println it
+        }
+
+        // define Ant task for DataNucleus Enhancer
+        ant.taskdef(
+            name : 'datanucleusenhancer',
+            classpath : sourceSets.main.runtimeClasspath.asPath,
+            classname : 'org.datanucleus.enhancer.EnhancerTask'
+        )
+
+        // run the DataNucleus Enhancer as an Ant task
+        ant.datanucleusenhancer(
+            classpath: sourceSets.main.runtimeClasspath.asPath,
+            verbose: true,
+            api: "JPA") {
+            entityFiles.addToAntBuilder(ant, 'fileset', FileCollection.AntType.FileSet)
+        }
+    }
 }
 
 dependencies {
 	appengineSdk "com.google.appengine:appengine-java-sdk:${appengineVersion}"
 	compile "com.google.appengine:appengine-api-1.0-sdk:${appengineVersion}"
-	compile 'com.google.inject.extensions:guice-servlet:3.0'
-	compile 'com.google.inject:guice:3.0:no_aop'
+	compile('com.google.inject.extensions:guice-servlet:3.0') {
+		exclude module: 'guice'
+	}
+	compile('com.google.inject:guice:3.0:no_aop') {
+		exclude module: 'cglib'
+	}
 	compile 'com.google.guava:guava:18.0'
 	compile 'com.google.code.findbugs:jsr305:2.0.3'
 	compile 'com.vaadin.addon:jpacontainer:3.2.0'
@@ -77,6 +92,15 @@ dependencies {
 	compile 'javax.inject:javax.inject:1'
 	compile "javax.servlet:servlet-api:2.5"
 	compile 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final'
-	compile 'org.datanucleus:datanucleus-accessplatform-jpa-rdbms:4.1.0-m3'
-	enhance 'org.datanucleus:datanucleus-enhancer:3.1.1'
+	runtime 'org.datanucleus:datanucleus-accessplatform-jpa-rdbms:3.1.3'
+	runtime 'org.datanucleus:datanucleus-enhancer:3.1.1'
+}
+
+tasks.eclipse.doLast {
+	tasks.copyRuntimeLibs.execute()
+}
+
+task copyRuntimeLibs(type: Copy) {
+    into "src/main/webapp/WEB-INF/lib"
+    from configurations.compile
 }

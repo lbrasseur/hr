@@ -17,7 +17,7 @@ public class Module extends AbstractModule {
 		requestStaticInjection(SerializableProvider.class);
 
 		// UI
-		bind(UIProvider.class).to(HrUiProvider.class);
+		bind(UIProvider.class).to(HrUiProvider.class).in(Singleton.class);
 		bind(NavigationManager.class).in(SessionScoped.class);
 
 		// Business

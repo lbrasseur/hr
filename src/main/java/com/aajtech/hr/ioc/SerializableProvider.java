@@ -10,10 +10,8 @@ import com.google.inject.Injector;
 import com.google.inject.TypeLiteral;
 
 public class SerializableProvider<T> implements Serializable {
-	@Inject
-	private transient static Injector injector;
-
 	private final Class<T> clazz;
+//	private transient T instance;
 
 	@SuppressWarnings("unchecked")
 	@Inject
@@ -22,6 +20,14 @@ public class SerializableProvider<T> implements Serializable {
 	}
 
 	public T get() {
-		return injector.getInstance(clazz);
+//		if (instance == null) {
+//			synchronized (this) {
+//				if (instance == null) {
+//					instance = injector.getInstance(clazz);
+//				}
+//			}
+//		}
+//		return instance;
+		return ContextListener.injector.getInstance(clazz);
 	}
 }

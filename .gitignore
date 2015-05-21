@@ -4,3 +4,6 @@
 /.settings
 /.project
 /.classpath
+/src/main/webapp/WEB-INF/appengine-generated
+/src/main/webapp/WEB-INF/classes
+/src/main/webapp/WEB-INF/lib

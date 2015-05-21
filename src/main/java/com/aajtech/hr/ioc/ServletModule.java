@@ -9,7 +9,7 @@ import com.aajtech.hr.ui.HrServlet;
 public class ServletModule extends com.google.inject.servlet.ServletModule {
 	@Override
 	protected void configureServlets() {
-		Class<? extends HttpServlet> servletClass = HrGaeServlet.inGae()
+		Class<? extends HttpServlet> servletClass = HrGaeServlet.inGae() && HrGaeServlet.inGaeProd()
 				? HrGaeServlet.class
 				: HrServlet.class;
 
