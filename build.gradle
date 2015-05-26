@@ -18,7 +18,7 @@ version = '0.1-SNAPSHOT'
 group = 'com.aajtech.hr'
 
 def appengineVersion = "1.9.19"
-def vaadinVersion = "7.4.4"
+def vaadinVersion = "7.4.3"
 
 repositories {
 	mavenLocal()

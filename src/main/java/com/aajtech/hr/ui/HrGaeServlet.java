@@ -3,7 +3,6 @@ package com.aajtech.hr.ui;
 import static java.util.Objects.requireNonNull;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 
 import com.google.appengine.api.utils.SystemProperty;
 import com.vaadin.server.GAEVaadinServlet;

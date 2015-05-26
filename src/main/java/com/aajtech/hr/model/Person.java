@@ -1,5 +1,6 @@
 package com.aajtech.hr.model;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 import javax.persistence.Column;
@@ -9,25 +10,25 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 @Entity
-public class Person {
+public class Person implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Integer id;
+	private Long id;
 
 	@Column
-	private String firstName;
+	private String firstName = "";
 
 	@Column
-	private String lastName;
+	private String lastName = "";
 
 	@Column
-	private String email;
+	private String email = "";
 
-	public Integer getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(Integer id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
@@ -73,5 +74,11 @@ public class Person {
 				&& Objects.equals(firstName, that.firstName)
 				&& Objects.equals(lastName, that.lastName)
 				&& Objects.equals(email, that.email);
+	}
+
+	@Override
+	public String toString() {
+		return "Person [id=" + id + ", firstName=" + firstName + ", lastName="
+				+ lastName + ", email=" + email + "]";
 	}
 }
