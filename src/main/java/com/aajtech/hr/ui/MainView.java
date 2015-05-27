@@ -8,14 +8,13 @@ import com.aajtech.hr.ioc.SerializableProvider;
 import com.aajtech.hr.ui.person.PersonView;
 import com.vaadin.addon.touchkit.ui.HorizontalButtonGroup;
 import com.vaadin.addon.touchkit.ui.NavigationManager;
-import com.vaadin.addon.touchkit.ui.NavigationView;
 import com.vaadin.addon.touchkit.ui.VerticalComponentGroup;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Label;
 
-public class MainView extends NavigationView {
+public class MainView extends BaseView {
 	@Inject
 	public MainView(final NavigationManager navigationManager,
 			final SerializableProvider<PersonView> personViewProvider) {
@@ -30,7 +29,7 @@ public class MainView extends NavigationView {
 		peopleRow.addComponent(new Button("->", new ClickListener() {
 			@Override
 			public void buttonClick(ClickEvent event) {
-				navigationManager.navigateTo(personViewProvider.get());
+				goTo(personViewProvider.get());
 			}
 		}));
 	}

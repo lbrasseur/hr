@@ -7,9 +7,12 @@ import javax.persistence.EntityManager;
 
 import com.aajtech.hr.ioc.SerializableProvider;
 import com.aajtech.hr.model.Person;
-import com.vaadin.addon.touchkit.ui.NavigationView;
+import com.aajtech.hr.ui.BaseView;
+import com.google.common.base.Throwables;
 import com.vaadin.addon.touchkit.ui.VerticalComponentGroup;
+import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup;
+import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -17,12 +20,14 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 
-public class PersonForm extends NavigationView {
+public class PersonForm extends BaseView {
 	private final FormLayout form;
 	private Person person;
+	private FieldGroup binder;
 
 	@Inject
 	public PersonForm(final SerializableProvider<EntityManager> emProvider) {
+		checkNotNull(emProvider);
 		getNavigationBar().setCaption("Edit person");
 
 		VerticalComponentGroup container = new VerticalComponentGroup();
@@ -35,17 +40,22 @@ public class PersonForm extends NavigationView {
 
 					@Override
 					public void buttonClick(ClickEvent event) {
-						EntityManager em = emProvider.get();
-						em.getTransaction().begin();
-						em.persist(person);
-						em.getTransaction().commit();
+						try {
+							binder.commit();
+							EntityManager em = emProvider.get();
+							em.getTransaction().begin();
+							em.persist(person);
+							em.getTransaction().commit();
 
-						getNavigationManager().navigateBack();
+							back();
+						} catch (CommitException e) {
+							Throwables.propagate(e);
+						}
 					}
 				}), new Button("Cancel", new ClickListener() {
 			@Override
 			public void buttonClick(ClickEvent event) {
-				getNavigationManager().navigateBack();
+				back();
 			}
 		})));
 	}
@@ -54,7 +64,8 @@ public class PersonForm extends NavigationView {
 		this.person = checkNotNull(person);
 		BeanItem<Person> item = new BeanItem<Person>(person);
 
-		FieldGroup binder = new FieldGroup(item);
+		binder = new BeanFieldGroup<Person>(Person.class);
+		binder.setItemDataSource(item);
 		form.addComponent(binder.buildAndBind("First name", "firstName"));
 		form.addComponent(binder.buildAndBind("Last name", "lastName"));
 		form.addComponent(binder.buildAndBind("Email", "email"));
