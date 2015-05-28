@@ -1,10 +1,23 @@
 package com.aajtech.hr.ioc;
 
+import java.io.IOException;
+
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 
 import com.aajtech.hr.model.Person;
+import com.aajtech.hr.oauth.User;
 import com.aajtech.hr.ui.HrUiProvider;
+import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
+import com.google.api.client.auth.oauth2.BearerToken;
+import com.google.api.client.auth.oauth2.ClientParametersAuthentication;
+import com.google.api.client.extensions.appengine.datastore.AppEngineDataStoreFactory;
+import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
+import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.common.base.Throwables;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
@@ -26,12 +39,15 @@ public class Module extends AbstractModule {
 		bind(NavigationManager.class).in(SessionScoped.class);
 
 		// Business
+		bind(User.class).in(SessionScoped.class);
 
 		// Data
 		bind(new TypeLiteral<JPAContainer<Person>>() {
 		}).toProvider(new JPAContainerProvider<Person>(Person.class));
 
 		// Services
+		bind(HttpTransport.class).to(UrlFetchTransport.class);
+		bind(JsonFactory.class).to(GsonFactory.class);
 	}
 
 	@Provides
@@ -39,4 +55,24 @@ public class Module extends AbstractModule {
 		return JPAContainerFactory
 				.createEntityManagerForPersistenceUnit(PERSISTENCE_UNIT);
 	}
+
+	@Provides
+	public AuthorizationCodeFlow getFlow(HttpTransport transport, JsonFactory jsonFactory) {
+        try {
+    		String clientId = "7764mb7zvicxp7";
+    		String clientSecret = "XnKmdTVlr3qSWbGc";
+			return new AuthorizationCodeFlow.Builder(
+			        BearerToken.authorizationHeaderAccessMethod(),
+			        transport,
+			        jsonFactory,
+			        new GenericUrl("https://www.linkedin.com/uas/oauth2/accessToken"),
+			        new ClientParametersAuthentication(clientId, clientSecret),
+			        clientId,
+			        "https://www.linkedin.com/uas/oauth2/authorization")
+					.setDataStoreFactory(AppEngineDataStoreFactory.getDefaultInstance())
+			        .build();
+		} catch (IOException e) {
+			throw Throwables.propagate(e);
+		}
+    }
 }
