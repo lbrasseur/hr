@@ -4,9 +4,15 @@ import java.io.IOException;
 
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
+import javax.servlet.http.HttpSession;
 
-import com.aajtech.hr.model.Person;
-import com.aajtech.hr.oauth.User;
+import com.aajtech.hr.business.api.UserManager;
+import com.aajtech.hr.business.impl.UserManagerImpl;
+import com.aajtech.hr.ioc.Annotations.UserId;
+import com.aajtech.hr.model.User;
+import com.aajtech.hr.service.api.LinkedInService;
+import com.aajtech.hr.service.api.UserDto;
+import com.aajtech.hr.service.impl.HttpClientLinkedInService;
 import com.aajtech.hr.ui.HrUiProvider;
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.auth.oauth2.BearerToken;
@@ -39,15 +45,17 @@ public class Module extends AbstractModule {
 		bind(NavigationManager.class).in(SessionScoped.class);
 
 		// Business
-		bind(User.class).in(SessionScoped.class);
+		bind(UserDto.class).in(SessionScoped.class);
+		bind(UserManager.class).to(UserManagerImpl.class);
 
 		// Data
-		bind(new TypeLiteral<JPAContainer<Person>>() {
-		}).toProvider(new JPAContainerProvider<Person>(Person.class));
+		bind(new TypeLiteral<JPAContainer<User>>() {
+		}).toProvider(new JPAContainerProvider<User>(User.class));
 
 		// Services
 		bind(HttpTransport.class).to(UrlFetchTransport.class);
 		bind(JsonFactory.class).to(GsonFactory.class);
+		bind(LinkedInService.class).to(HttpClientLinkedInService.class);
 	}
 
 	@Provides
@@ -75,4 +83,9 @@ public class Module extends AbstractModule {
 			throw Throwables.propagate(e);
 		}
     }
+
+	@Provides @UserId
+	public String getUserId(HttpSession session) {
+		return (String) session.getAttribute(UserId.KEY);
+	}
 }

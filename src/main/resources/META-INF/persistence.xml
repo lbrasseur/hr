@@ -6,7 +6,6 @@
 
     <persistence-unit name="HR">
         <provider>org.datanucleus.api.jpa.PersistenceProviderImpl</provider>
-        <class>com.aajtech.hr.model.Person</class>
         <properties>
             <property name="datanucleus.NontransactionalRead" value="true"/>
             <property name="datanucleus.NontransactionalWrite" value="true"/>

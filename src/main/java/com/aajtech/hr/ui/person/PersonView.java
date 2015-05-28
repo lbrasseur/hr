@@ -5,7 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import javax.inject.Inject;
 
 import com.aajtech.hr.ioc.SerializableProvider;
-import com.aajtech.hr.model.Person;
+import com.aajtech.hr.model.User;
 import com.aajtech.hr.ui.BaseView;
 import com.vaadin.addon.jpacontainer.JPAContainer;
 import com.vaadin.addon.touchkit.ui.VerticalComponentGroup;
@@ -17,10 +17,10 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 
 public class PersonView extends BaseView {
-	private final JPAContainer<Person> personContainer;
+	private final JPAContainer<User> personContainer;
 	@Inject
 	public PersonView(final SerializableProvider<PersonForm> personFormProvider,
-			final JPAContainer<Person> personContainer) {
+			final JPAContainer<User> personContainer) {
 		checkNotNull(personFormProvider);
 		this.personContainer = checkNotNull(personContainer);
 		getNavigationBar().setCaption("People");
@@ -33,7 +33,7 @@ public class PersonView extends BaseView {
 					@Override
 					public void buttonClick(ClickEvent event) {
 						PersonForm form = personFormProvider.get();
-						form.edit(new Person());
+						form.edit(new User());
 						goTo(form);
 					}
 				})));

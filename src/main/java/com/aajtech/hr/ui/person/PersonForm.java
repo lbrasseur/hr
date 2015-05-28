@@ -6,7 +6,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 import com.aajtech.hr.ioc.SerializableProvider;
-import com.aajtech.hr.model.Person;
+import com.aajtech.hr.model.User;
 import com.aajtech.hr.ui.BaseView;
 import com.google.common.base.Throwables;
 import com.vaadin.addon.touchkit.ui.VerticalComponentGroup;
@@ -22,7 +22,7 @@ import com.vaadin.ui.HorizontalLayout;
 
 public class PersonForm extends BaseView {
 	private final FormLayout form;
-	private Person person;
+	private User person;
 	private FieldGroup binder;
 
 	@Inject
@@ -60,11 +60,11 @@ public class PersonForm extends BaseView {
 		})));
 	}
 
-	public void edit(Person person) {
+	public void edit(User person) {
 		this.person = checkNotNull(person);
-		BeanItem<Person> item = new BeanItem<Person>(person);
+		BeanItem<User> item = new BeanItem<User>(person);
 
-		binder = new BeanFieldGroup<Person>(Person.class);
+		binder = new BeanFieldGroup<User>(User.class);
 		binder.setItemDataSource(item);
 		form.addComponent(binder.buildAndBind("First name", "firstName"));
 		form.addComponent(binder.buildAndBind("Last name", "lastName"));
