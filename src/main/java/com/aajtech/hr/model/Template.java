@@ -1,12 +1,14 @@
 package com.aajtech.hr.model;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 
 @Entity
-public class Template {
+public class Template implements Serializable {
 	@Id
 	private String name = "";
 

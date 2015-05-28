@@ -30,11 +30,13 @@ public class MainView extends BaseView {
 	public MainView(final NavigationManager navigationManager,
 			final SerializableProvider<UserView> userViewProvider,
 			final SerializableProvider<TemplateView> templateViewProvider,
-			UserManager userManager, final TemplateManager templateManager) {
+			UserManager userManager,
+			final SerializableProvider<TemplateManager> templateManagerProvider) {
 		checkNotNull(navigationManager);
 		checkNotNull(userViewProvider);
 		checkNotNull(templateViewProvider);
 		checkNotNull(userManager);
+		checkNotNull(templateManagerProvider);
 
 		getNavigationBar().setCaption("Main Menu");
 		VerticalComponentGroup container = new VerticalComponentGroup();
@@ -52,8 +54,9 @@ public class MainView extends BaseView {
 										@Override
 										public InputStream getStream() {
 											return new ByteArrayInputStream(
-													templateManager
-															.buildResume(user));
+													templateManagerProvider
+															.get().buildResume(
+																	user));
 										}
 									}, user.getFirstName() + " "
 											+ user.getLastName() + ".docx")));

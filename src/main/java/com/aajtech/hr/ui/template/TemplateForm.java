@@ -6,6 +6,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -97,10 +98,14 @@ public class TemplateForm extends BaseView {
 				}, template.getName() + ".docx")));
 	}
 
-	private class TemplateUploader implements Receiver, SucceededListener {
-		public ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+	private class TemplateUploader implements Receiver, SucceededListener,
+			Serializable {
+		public transient ByteArrayOutputStream buffer;
 
 		public OutputStream receiveUpload(String filename, String mimeType) {
+			if (buffer == null) {
+				buffer = new ByteArrayOutputStream();
+			}
 			return buffer;
 		}
 

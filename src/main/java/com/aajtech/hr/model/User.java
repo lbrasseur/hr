@@ -1,5 +1,6 @@
 package com.aajtech.hr.model;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 import javax.persistence.Column;
@@ -8,7 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.Lob;
 
 @Entity
-public class User {
+public class User implements Serializable {
 	@Id
 	private String id;
 
