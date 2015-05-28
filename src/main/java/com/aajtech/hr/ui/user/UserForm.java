@@ -1,4 +1,4 @@
-package com.aajtech.hr.ui.person;
+package com.aajtech.hr.ui.user;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -20,15 +20,15 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 
-public class PersonForm extends BaseView {
+public class UserForm extends BaseView {
 	private final FormLayout form;
-	private User person;
+	private User user;
 	private FieldGroup binder;
 
 	@Inject
-	public PersonForm(final SerializableProvider<EntityManager> emProvider) {
+	public UserForm(final SerializableProvider<EntityManager> emProvider) {
 		checkNotNull(emProvider);
-		getNavigationBar().setCaption("Edit person");
+		getNavigationBar().setCaption("Edit user");
 
 		VerticalComponentGroup container = new VerticalComponentGroup();
 		setContent(container);
@@ -44,7 +44,7 @@ public class PersonForm extends BaseView {
 							binder.commit();
 							EntityManager em = emProvider.get();
 							em.getTransaction().begin();
-							em.persist(person);
+							em.merge(user);
 							em.getTransaction().commit();
 
 							back();
@@ -60,9 +60,9 @@ public class PersonForm extends BaseView {
 		})));
 	}
 
-	public void edit(User person) {
-		this.person = checkNotNull(person);
-		BeanItem<User> item = new BeanItem<User>(person);
+	public void edit(User user) {
+		this.user = checkNotNull(user);
+		BeanItem<User> item = new BeanItem<User>(user);
 
 		binder = new BeanFieldGroup<User>(User.class);
 		binder.setItemDataSource(item);

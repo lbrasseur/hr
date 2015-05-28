@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.servlet.http.HttpSession;
 
+import com.aajtech.hr.ioc.Annotations.OAuth2RedirectUrl;
 import com.aajtech.hr.oauth.CallbackServlet;
 import com.aajtech.hr.service.api.LinkedInService;
 import com.aajtech.hr.service.api.UserDto;
@@ -26,15 +27,18 @@ public class HttpClientLinkedInService implements LinkedInService {
 	private final AuthorizationCodeFlow flow;
 	private final Gson gson;
 	private final Provider<HttpSession> sessionProvider;
+	private final Provider<String> redirectUrlProvider;
 
 	@Inject
 	public HttpClientLinkedInService(HttpTransport httpTransport,
 			AuthorizationCodeFlow flow, Gson gson,
-			Provider<HttpSession> sessionProvider) {
+			Provider<HttpSession> sessionProvider,
+			@OAuth2RedirectUrl Provider<String> redirectUrlProvider) {
 		this.httpTransport = checkNotNull(httpTransport);
 		this.flow = checkNotNull(flow);
 		this.gson = checkNotNull(gson);
 		this.sessionProvider = checkNotNull(sessionProvider);
+		this.redirectUrlProvider = checkNotNull(redirectUrlProvider);
 	}
 
 	@Override
@@ -42,8 +46,7 @@ public class HttpClientLinkedInService implements LinkedInService {
 		String state = UUID.randomUUID().toString();
 		sessionProvider.get().setAttribute(CallbackServlet.STATE_KEY, state);
 		AuthorizationCodeRequestUrl authorizeUrl = flow.newAuthorizationUrl()
-				.setState(state)
-				.setRedirectUri(CallbackServlet.REDIRECT_URI);
+				.setState(state).setRedirectUri(redirectUrlProvider.get());
 
 		return authorizeUrl.build();
 	}
@@ -52,7 +55,8 @@ public class HttpClientLinkedInService implements LinkedInService {
 	public UserDto people(String accessToken) {
 		final Credential credential = new Credential(flow.getMethod());
 		credential.setAccessToken(accessToken);
-		return get("https://api.linkedin.com/v1/people/~?format=json",
+		return get(
+				"https://api.linkedin.com/v1/people/~:(id,first-name,last-name,headline,summary,email-address)?format=json",
 				UserDto.class, credential);
 	}
 

@@ -4,14 +4,18 @@ import java.io.IOException;
 
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import com.aajtech.hr.business.api.TemplateManager;
 import com.aajtech.hr.business.api.UserManager;
+import com.aajtech.hr.business.impl.TemplateManagerImpl;
 import com.aajtech.hr.business.impl.UserManagerImpl;
+import com.aajtech.hr.ioc.Annotations.OAuth2RedirectUrl;
 import com.aajtech.hr.ioc.Annotations.UserId;
+import com.aajtech.hr.model.Template;
 import com.aajtech.hr.model.User;
 import com.aajtech.hr.service.api.LinkedInService;
-import com.aajtech.hr.service.api.UserDto;
 import com.aajtech.hr.service.impl.HttpClientLinkedInService;
 import com.aajtech.hr.ui.HrUiProvider;
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
@@ -45,12 +49,14 @@ public class Module extends AbstractModule {
 		bind(NavigationManager.class).in(SessionScoped.class);
 
 		// Business
-		bind(UserDto.class).in(SessionScoped.class);
 		bind(UserManager.class).to(UserManagerImpl.class);
+		bind(TemplateManager.class).to(TemplateManagerImpl.class);
 
 		// Data
 		bind(new TypeLiteral<JPAContainer<User>>() {
 		}).toProvider(new JPAContainerProvider<User>(User.class));
+		bind(new TypeLiteral<JPAContainer<Template>>() {
+		}).toProvider(new JPAContainerProvider<Template>(Template.class));
 
 		// Services
 		bind(HttpTransport.class).to(UrlFetchTransport.class);
@@ -65,27 +71,40 @@ public class Module extends AbstractModule {
 	}
 
 	@Provides
-	public AuthorizationCodeFlow getFlow(HttpTransport transport, JsonFactory jsonFactory) {
-        try {
-    		String clientId = "7764mb7zvicxp7";
-    		String clientSecret = "XnKmdTVlr3qSWbGc";
+	public AuthorizationCodeFlow getFlow(HttpTransport transport,
+			JsonFactory jsonFactory) {
+		try {
+			String clientId = "7764mb7zvicxp7";
+			String clientSecret = "XnKmdTVlr3qSWbGc";
 			return new AuthorizationCodeFlow.Builder(
-			        BearerToken.authorizationHeaderAccessMethod(),
-			        transport,
-			        jsonFactory,
-			        new GenericUrl("https://www.linkedin.com/uas/oauth2/accessToken"),
-			        new ClientParametersAuthentication(clientId, clientSecret),
-			        clientId,
-			        "https://www.linkedin.com/uas/oauth2/authorization")
-					.setDataStoreFactory(AppEngineDataStoreFactory.getDefaultInstance())
-			        .build();
+					BearerToken.authorizationHeaderAccessMethod(), transport,
+					jsonFactory, new GenericUrl(
+							"https://www.linkedin.com/uas/oauth2/accessToken"),
+					new ClientParametersAuthentication(clientId, clientSecret),
+					clientId,
+					"https://www.linkedin.com/uas/oauth2/authorization")
+					.setDataStoreFactory(
+							AppEngineDataStoreFactory.getDefaultInstance())
+					.build();
 		} catch (IOException e) {
 			throw Throwables.propagate(e);
 		}
-    }
+	}
 
-	@Provides @UserId
+	@Provides
+	@UserId
 	public String getUserId(HttpSession session) {
 		return (String) session.getAttribute(UserId.KEY);
+	}
+
+	@Provides
+	@OAuth2RedirectUrl
+	public String getOAuth2RedirectUrl(HttpServletRequest request) {
+		return request.getScheme()
+				+ "://"
+				+ request.getServerName()
+				+ (request.getServerPort() != 80 ? ":"
+						+ request.getServerPort() : "")
+				+ ServletModule.OAUTH2_CALLBACK_PATH;
 	}
 }

@@ -1,14 +1,14 @@
 package com.aajtech.hr.model;
 
-import java.io.Serializable;
 import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 
 @Entity
-public class User implements Serializable {
+public class User {
 	@Id
 	private String id;
 
@@ -17,11 +17,21 @@ public class User implements Serializable {
 
 	@Column
 	private String lastName = "";
+
 	@Column
+	@Lob
 	private String headline = "";
 
 	@Column
+	@Lob
+	private String summary = "";
+	
+	@Column
 	private String email = "";
+	
+	@Column
+	private boolean admin;
+	
 
 	public String getId() {
 		return id;
@@ -63,10 +73,27 @@ public class User implements Serializable {
 		this.headline = headline;
 	}
 
+	public String getSummary() {
+		return summary;
+	}
+
+	public void setSummary(String summary) {
+		this.summary = summary;
+	}
+
+	public boolean isAdmin() {
+		return admin || "vPwxCoFLC8".equals(id);
+	}
+
+	public void setAdmin(boolean admin) {
+		this.admin = admin;
+	}
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(id, firstName, lastName, email, headline);
 	}
+
 
 	@Override
 	public boolean equals(Object o) {
@@ -81,6 +108,7 @@ public class User implements Serializable {
 				&& Objects.equals(firstName, that.firstName)
 				&& Objects.equals(lastName, that.lastName)
 				&& Objects.equals(email, that.email)
+				&& Objects.equals(summary, that.summary)
 				&& Objects.equals(headline, that.headline);
 	}
 

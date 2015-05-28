@@ -5,6 +5,8 @@ public class UserDto {
 	private String firstName;
 	private String lastName;
 	private String headline;
+	private String summary;
+	private String emailAddress;
 
 	public String getId() {
 		return id;
@@ -22,4 +24,11 @@ public class UserDto {
 		return headline;
 	}
 
+	public String getSummary() {
+		return summary;
+	}
+
+	public String getEmailAddress() {
+		return emailAddress;
+	}
 }

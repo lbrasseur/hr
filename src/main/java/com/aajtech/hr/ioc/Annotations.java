@@ -15,11 +15,18 @@ import com.google.inject.BindingAnnotation;
  * Annotations for IoC configuration.
  */
 public interface Annotations {
-    @Qualifier
-    @BindingAnnotation
-    @Target({PARAMETER, METHOD})
-    @Retention(RUNTIME)
-    public @interface UserId {
-    	String KEY = "aajUserId";
-    }
+	@Qualifier
+	@BindingAnnotation
+	@Target({ PARAMETER, METHOD })
+	@Retention(RUNTIME)
+	public @interface UserId {
+		String KEY = "aajUserId";
+	}
+
+	@Qualifier
+	@BindingAnnotation
+	@Target({ PARAMETER, METHOD })
+	@Retention(RUNTIME)
+	public @interface OAuth2RedirectUrl {
+	}
 }
