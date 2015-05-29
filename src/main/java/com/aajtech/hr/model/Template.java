@@ -7,12 +7,13 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 
+import com.google.appengine.api.datastore.Blob;
+
 @Entity
 public class Template implements Serializable {
 	@Id
 	private String name = "";
 
-	@Column
 	@Lob
 	private byte[] file;
 

@@ -38,10 +38,11 @@ public class TemplateForm extends BaseView {
 	private final FormLayout form;
 	private Template template;
 	private FieldGroup binder;
+	private final SerializableProvider<EntityManager> emProvider;
 
 	@Inject
 	public TemplateForm(final SerializableProvider<EntityManager> emProvider) {
-		checkNotNull(emProvider);
+		this.emProvider = checkNotNull(emProvider);
 		getNavigationBar().setCaption("Edit user");
 
 		VerticalComponentGroup container = new VerticalComponentGroup();
@@ -58,6 +59,7 @@ public class TemplateForm extends BaseView {
 							binder.commit();
 							EntityManager em = emProvider.get();
 							em.getTransaction().begin();
+							System.out.println("MATANGA1: " + (template.getFile() != null ? template.getFile().length : " NULO"));
 							em.merge(template);
 							em.getTransaction().commit();
 
@@ -111,6 +113,10 @@ public class TemplateForm extends BaseView {
 
 		public void uploadSucceeded(SucceededEvent event) {
 			template.setFile(buffer.toByteArray());
+			EntityManager em = emProvider.get();
+			em.getTransaction().begin();
+			em.merge(template);
+			em.getTransaction().commit();
 		}
 	}
 }
