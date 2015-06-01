@@ -11,6 +11,8 @@ import com.aajtech.hr.business.api.TemplateManager;
 import com.aajtech.hr.business.api.UserManager;
 import com.aajtech.hr.business.impl.TemplateManagerImpl;
 import com.aajtech.hr.business.impl.UserManagerImpl;
+import com.aajtech.hr.data.api.JpaHelper;
+import com.aajtech.hr.data.impl.JpaHelperImpl;
 import com.aajtech.hr.ioc.Annotations.OAuth2RedirectUrl;
 import com.aajtech.hr.ioc.Annotations.UserId;
 import com.aajtech.hr.model.Template;
@@ -53,6 +55,7 @@ public class Module extends AbstractModule {
 		bind(TemplateManager.class).to(TemplateManagerImpl.class);
 
 		// Data
+		bind(JpaHelper.class).to(JpaHelperImpl.class);
 		bind(new TypeLiteral<JPAContainer<User>>() {
 		}).toProvider(new JPAContainerProvider<User>(User.class));
 		bind(new TypeLiteral<JPAContainer<Template>>() {

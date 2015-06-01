@@ -11,15 +11,15 @@ import java.io.Serializable;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
+import com.aajtech.hr.data.api.JpaHelper;
+import com.aajtech.hr.data.api.JpaHelper.JpaCallback;
 import com.aajtech.hr.ioc.SerializableProvider;
 import com.aajtech.hr.model.Template;
 import com.aajtech.hr.ui.BaseView;
 import com.google.common.base.Strings;
-import com.google.common.base.Throwables;
 import com.vaadin.addon.touchkit.ui.VerticalComponentGroup;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup;
-import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.server.StreamResource;
 import com.vaadin.ui.Button;
@@ -38,11 +38,11 @@ public class TemplateForm extends BaseView {
 	private final FormLayout form;
 	private Template template;
 	private FieldGroup binder;
-	private final SerializableProvider<EntityManager> emProvider;
+	private final SerializableProvider<JpaHelper> jpaHelperProvider;
 
 	@Inject
-	public TemplateForm(final SerializableProvider<EntityManager> emProvider) {
-		this.emProvider = checkNotNull(emProvider);
+	public TemplateForm(final SerializableProvider<JpaHelper> jpaHelperProvider) {
+		this.jpaHelperProvider = checkNotNull(jpaHelperProvider);
 		getNavigationBar().setCaption("Edit user");
 
 		VerticalComponentGroup container = new VerticalComponentGroup();
@@ -55,18 +55,15 @@ public class TemplateForm extends BaseView {
 
 					@Override
 					public void buttonClick(ClickEvent event) {
-						try {
-							binder.commit();
-							EntityManager em = emProvider.get();
-							em.getTransaction().begin();
-							System.out.println("MATANGA1: " + (template.getFile() != null ? template.getFile().length : " NULO"));
-							em.merge(template);
-							em.getTransaction().commit();
-
-							back();
-						} catch (CommitException e) {
-							Throwables.propagate(e);
-						}
+						jpaHelperProvider.get().doInJpa(
+								new JpaCallback<Void>() {
+									@Override
+									public Void call(EntityManager entityManager)
+											throws Exception {
+										entityManager.merge(template);
+										return null;
+									}
+								});
 					}
 				}), new Button("Cancel", new ClickListener() {
 			@Override
@@ -113,10 +110,13 @@ public class TemplateForm extends BaseView {
 
 		public void uploadSucceeded(SucceededEvent event) {
 			template.setFile(buffer.toByteArray());
-			EntityManager em = emProvider.get();
-			em.getTransaction().begin();
-			em.merge(template);
-			em.getTransaction().commit();
+			jpaHelperProvider.get().doInJpa(new JpaCallback<Void>() {
+				@Override
+				public Void call(EntityManager entityManager) throws Exception {
+					entityManager.merge(template);
+					return null;
+				}
+			});
 		}
 	}
 }

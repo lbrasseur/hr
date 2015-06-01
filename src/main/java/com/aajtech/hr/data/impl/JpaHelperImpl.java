@@ -1,19 +1,23 @@
-package com.aajtech.hr.business.impl;
+package com.aajtech.hr.data.impl;
 
+import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
+import com.aajtech.hr.data.api.JpaHelper;
 import com.google.common.base.Throwables;
 
-class BaseJpaManager {
+public class JpaHelperImpl implements JpaHelper {
 	private final Provider<EntityManager> entityManagerProvider;
 
-	BaseJpaManager(Provider<EntityManager> entityManagerProvider) {
+	@Inject
+	public JpaHelperImpl(Provider<EntityManager> entityManagerProvider) {
 		this.entityManagerProvider = entityManagerProvider;
 	}
 
-	<T> T doInJpa(JpaCallback<T> callback) {
+	@Override
+	public <T> T doInJpa(JpaCallback<T> callback) {
 		EntityManager entityManager = entityManagerProvider.get();
 		EntityTransaction tx = entityManager.getTransaction();
 		try {
@@ -27,9 +31,5 @@ class BaseJpaManager {
 		} finally {
 			entityManager.close();
 		}
-	}
-
-	interface JpaCallback<T> {
-		T call(EntityManager entityManager) throws Exception;
 	}
 }

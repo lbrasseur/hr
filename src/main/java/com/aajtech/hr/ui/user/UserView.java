@@ -39,7 +39,7 @@ public class UserView extends BaseView {
 				@SuppressWarnings("unchecked")
 				JPAContainerItem<User> beanItem = (JPAContainerItem<User>) event.getItem();
 				UserForm form = personFormProvider.get();
-				form.edit(beanItem);
+				form.edit(beanItem.getEntity());
 				goTo(form);
 			}
 		});

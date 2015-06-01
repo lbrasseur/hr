@@ -1,12 +1,13 @@
 package com.aajtech.hr.business.impl;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.persistence.EntityManager;
 
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -17,20 +18,22 @@ import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 
 import com.aajtech.hr.business.api.TemplateManager;
+import com.aajtech.hr.data.api.JpaHelper;
+import com.aajtech.hr.data.api.JpaHelper.JpaCallback;
 import com.aajtech.hr.model.Template;
 import com.aajtech.hr.model.User;
 
-public class TemplateManagerImpl extends BaseJpaManager implements
-		TemplateManager {
+public class TemplateManagerImpl implements TemplateManager {
+	private final JpaHelper jpaHelper;
 
 	@Inject
-	public TemplateManagerImpl(Provider<EntityManager> entityManagerProvider) {
-		super(entityManagerProvider);
+	public TemplateManagerImpl(JpaHelper jpaHelper) {
+		this.jpaHelper = checkNotNull(jpaHelper);
 	}
 
 	@Override
 	public byte[] buildResume(final User user) {
-		return doInJpa(new JpaCallback<byte[]>() {
+		return jpaHelper.doInJpa(new JpaCallback<byte[]>() {
 			@Override
 			public byte[] call(EntityManager entityManager) throws IOException {
 				// TODO: marcar un template como template por defecot o algo asi

@@ -7,20 +7,23 @@ import javax.inject.Provider;
 import javax.persistence.EntityManager;
 
 import com.aajtech.hr.business.api.UserManager;
+import com.aajtech.hr.data.api.JpaHelper;
+import com.aajtech.hr.data.api.JpaHelper.JpaCallback;
 import com.aajtech.hr.ioc.Annotations.UserId;
 import com.aajtech.hr.model.User;
 import com.aajtech.hr.service.api.LinkedInService;
 import com.aajtech.hr.service.api.UserDto;
 
-public class UserManagerImpl extends BaseJpaManager implements UserManager {
+public class UserManagerImpl implements UserManager {
+	private final JpaHelper jpaHelper;
 	private final LinkedInService linkedInService;
 	private final Provider<String> userIdProvider;
 
 	@Inject
-	public UserManagerImpl(LinkedInService linkedInService,
-			@UserId Provider<String> userIdProvider,
-			Provider<EntityManager> entityManagerProvider) {
-		super(entityManagerProvider);
+	public UserManagerImpl(JpaHelper jpaHelper,
+			LinkedInService linkedInService,
+			@UserId Provider<String> userIdProvider) {
+		this.jpaHelper = checkNotNull(jpaHelper);
 		this.linkedInService = checkNotNull(linkedInService);
 		this.userIdProvider = checkNotNull(userIdProvider);
 	}
@@ -37,7 +40,7 @@ public class UserManagerImpl extends BaseJpaManager implements UserManager {
 
 	@Override
 	public String updateUserData(final String accessToken) {
-		return doInJpa(new JpaCallback<String>() {
+		return jpaHelper.doInJpa(new JpaCallback<String>() {
 			@Override
 			public String call(EntityManager entityManager) {
 				UserDto userDto = linkedInService.people(accessToken);
@@ -59,7 +62,7 @@ public class UserManagerImpl extends BaseJpaManager implements UserManager {
 
 	@Override
 	public User getUser() {
-		return doInJpa(new JpaCallback<User>() {
+		return jpaHelper.doInJpa(new JpaCallback<User>() {
 			@Override
 			public User call(EntityManager entityManager) {
 				return entityManager.find(User.class, userIdProvider.get());
