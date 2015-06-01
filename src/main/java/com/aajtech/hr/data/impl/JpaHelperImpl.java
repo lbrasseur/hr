@@ -23,10 +23,13 @@ public class JpaHelperImpl implements JpaHelper {
 		try {
 			tx.begin();
 			T returnValue = callback.call(entityManager);
+			entityManager.flush();
 			tx.commit();
 			return returnValue;
 		} catch (Exception e) {
-			tx.rollback();
+			if (tx.isActive()) {
+				tx.rollback();
+			}
 			throw Throwables.propagate(e);
 		} finally {
 			entityManager.close();

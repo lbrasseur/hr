@@ -30,7 +30,7 @@ public class UserForm extends BaseView {
 			final SerializableProvider<JpaHelper> jpaHelperProvider) {
 		checkNotNull(emProvider);
 		checkNotNull(jpaHelperProvider);
-		getNavigationBar().setCaption("Edit template");
+		getNavigationBar().setCaption("Edit user");
 
 		VerticalComponentGroup container = new VerticalComponentGroup();
 		setContent(container);
@@ -50,10 +50,10 @@ public class UserForm extends BaseView {
 										binder.commit();
 										entityManager.merge(user);
 
-										back();
 										return null;
 									}
 								});
+						back();
 					}
 				}), new Button("Cancel", new ClickListener() {
 			@Override

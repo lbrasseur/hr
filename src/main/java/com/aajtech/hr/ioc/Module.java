@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
+import javax.persistence.Persistence;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -32,7 +33,6 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.common.base.Throwables;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
-import com.google.inject.TypeLiteral;
 import com.google.inject.servlet.SessionScoped;
 import com.vaadin.addon.jpacontainer.JPAContainer;
 import com.vaadin.addon.jpacontainer.JPAContainerFactory;
@@ -56,10 +56,6 @@ public class Module extends AbstractModule {
 
 		// Data
 		bind(JpaHelper.class).to(JpaHelperImpl.class);
-		bind(new TypeLiteral<JPAContainer<User>>() {
-		}).toProvider(new JPAContainerProvider<User>(User.class));
-		bind(new TypeLiteral<JPAContainer<Template>>() {
-		}).toProvider(new JPAContainerProvider<Template>(Template.class));
 
 		// Services
 		bind(HttpTransport.class).to(UrlFetchTransport.class);
@@ -69,8 +65,20 @@ public class Module extends AbstractModule {
 
 	@Provides
 	public EntityManager getEntityManager() {
-		return JPAContainerFactory
-				.createEntityManagerForPersistenceUnit(PERSISTENCE_UNIT);
+		return Persistence.createEntityManagerFactory(PERSISTENCE_UNIT)
+				.createEntityManager();
+	}
+
+	@Provides
+	public JPAContainer<Template> getTemplateJPAContainerProvider(
+			EntityManager enitityManager) {
+		return JPAContainerFactory.make(Template.class, enitityManager);
+	}
+
+	@Provides
+	public JPAContainer<User> getUserJPAContainerProvider(
+			EntityManager enitityManager) {
+		return JPAContainerFactory.make(User.class, enitityManager);
 	}
 
 	@Provides

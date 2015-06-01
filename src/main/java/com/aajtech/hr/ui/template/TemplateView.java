@@ -25,6 +25,7 @@ public class TemplateView extends BaseView {
 	@Inject
 	public TemplateView(
 			final SerializableProvider<TemplateForm> templateFormProvider,
+			final SerializableProvider<TemplateUpload> templateUploadProvider,
 			final JPAContainer<Template> templateContainer) {
 		checkNotNull(templateFormProvider);
 		this.templateContainer = checkNotNull(templateContainer);
@@ -52,9 +53,9 @@ public class TemplateView extends BaseView {
 			public void itemClick(ItemClickEvent event) {
 				@SuppressWarnings("unchecked")
 				JPAContainerItem<Template> beanItem = (JPAContainerItem<Template>) event.getItem();
-				TemplateForm form = templateFormProvider.get();
-				form.edit(beanItem.getEntity());
-				goTo(form);
+				TemplateUpload uppload = templateUploadProvider.get();
+				uppload.edit(beanItem.getEntity());
+				goTo(uppload);
 			}
 		});
 		container.addComponent(grid);
