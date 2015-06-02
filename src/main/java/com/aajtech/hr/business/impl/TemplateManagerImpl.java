@@ -36,10 +36,10 @@ public class TemplateManagerImpl implements TemplateManager {
 		return jpaHelper.doInJpa(new JpaCallback<byte[]>() {
 			@Override
 			public byte[] call(EntityManager entityManager) throws IOException {
-				// TODO: marcar un template como template por defecot o algo asi
-				Template template = entityManager.createQuery(
-						"select t from Template t", Template.class)
-						.getSingleResult();
+				// TODO: marcar un template como template por defecto o algo asi
+				Template template = entityManager
+						.createQuery("select t from Template t", Template.class)
+						.getResultList().get(0);
 
 				XWPFDocument doc = new XWPFDocument(new ByteArrayInputStream(
 						template.getFile()));
@@ -47,18 +47,14 @@ public class TemplateManagerImpl implements TemplateManager {
 				for (XWPFParagraph p : doc.getParagraphs()) {
 					List<XWPFRun> runs = p.getRuns();
 					if (runs != null) {
-						for (XWPFRun r : runs) {
-							replaceUserData(r, user);
-						}
+						replaceUserData(runs, user);
 					}
 				}
 				for (XWPFTable tbl : doc.getTables()) {
 					for (XWPFTableRow row : tbl.getRows()) {
 						for (XWPFTableCell cell : row.getTableCells()) {
 							for (XWPFParagraph p : cell.getParagraphs()) {
-								for (XWPFRun r : p.getRuns()) {
-									replaceUserData(r, user);
-								}
+								replaceUserData(p.getRuns(), user);
 							}
 						}
 					}
@@ -72,16 +68,68 @@ public class TemplateManagerImpl implements TemplateManager {
 
 	}
 
-	private void replaceUserData(XWPFRun r, User user) {
-		replace(r, "headline", user.getHeadline());
-		replace(r, "summary", user.getSummary());
+	private void replaceUserData(List<XWPFRun> runs, User user) {
+		findAndReplace(runs, "[headline]", user.getHeadline());
+		findAndReplace(runs, "[summary]", user.getSummary());
 	}
 
-	private void replace(XWPFRun r, String template, String value) {
-		String text = r.getText(0);
-		if (text.contains(template)) {
-			text = text.replaceAll(template, value);
-			r.setText(text, 0);
+	private void findAndReplace(List<XWPFRun> runs, String template,
+			String value) {
+		int startRun = 0;
+		int startChar = 0;
+		while (startRun < runs.size()) {
+			int endRun = startRun;
+			int endChar = startChar;
+			int templateChar = 0;
+
+			boolean found = false;
+			while (endRun < runs.size()
+					&& endChar < runs.get(endRun).getText(0).length()) {
+				XWPFRun run = runs.get(endRun);
+				String runText = run.getText(0);
+				if (runText.charAt(endChar) == template.charAt(templateChar)) {
+					templateChar++;
+					endChar++;
+					if (templateChar == template.length()) {
+						found = true;
+						break;
+					} else if (endChar == runText.length()) {
+						endRun++;
+						endChar = 0;
+					}
+				} else {
+					break;
+				}
+			}
+			if (found) {
+				replace(runs, startRun, startChar, endRun, endChar, value);
+			}
+			startRun = endRun;
+			startChar = endChar + 1;
+			if (startChar > runs.get(startRun).getText(0).length()) {
+				startRun++;
+				startChar = 0;
+			}
+		}
+	}
+
+	private void replace(List<XWPFRun> runs, int startRunPos, int startChar,
+			int endRunPos, int endChar, String value) {
+		XWPFRun startRun = runs.get(startRunPos);
+		String startRunText = startRun.getText(0);
+		if (startRunPos == endRunPos) {
+			startRun.setText(startRunText.substring(0, startChar) + value
+					+ startRunText.substring(endChar), 0);
+		} else {
+			XWPFRun endRun = runs.get(endRunPos);
+			String endRunText = endRun.getText(0);
+
+			startRun.setText(startRunText.substring(0, startChar) + value, 0);
+			endRun.setText(endRunText.substring(endChar), 0);
+
+			for (int n = startRunPos + 1; n < endRunPos; n++) {
+				runs.get(n).setText("", 0);
+			}
 		}
 	}
 }
