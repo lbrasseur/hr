@@ -47,19 +47,18 @@ public class MainView extends BaseView {
 			container.addComponent(new Label("Welcome " + user.getFirstName()
 					+ " " + user.getLastName()));
 
-			container
-					.addComponent(new Link("Download Resume",
-							new StreamResource(
-									new StreamResource.StreamSource() {
-										@Override
-										public InputStream getStream() {
-											return new ByteArrayInputStream(
-													templateManagerProvider
-															.get().buildResume(
-																	user));
-										}
-									}, user.getFirstName() + " "
-											+ user.getLastName() + ".docx")));
+			if (templateManagerProvider.get().isActiveTemplate()) {
+				container.addComponent(new Link("Download Resume",
+						new StreamResource(new StreamResource.StreamSource() {
+							@Override
+							public InputStream getStream() {
+								return new ByteArrayInputStream(
+										templateManagerProvider.get()
+												.buildResume(user));
+							}
+						}, user.getFirstName() + " " + user.getLastName()
+								+ ".docx")));
+			}
 
 			if (user.isAdmin()) {
 				container.addComponent(buildMenuOption("Users",

@@ -11,6 +11,7 @@ import java.io.Serializable;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
+import com.aajtech.hr.business.api.TemplateManager;
 import com.aajtech.hr.data.api.JpaHelper;
 import com.aajtech.hr.data.api.JpaHelper.JpaCallback;
 import com.aajtech.hr.ioc.SerializableProvider;
@@ -18,6 +19,9 @@ import com.aajtech.hr.model.Template;
 import com.aajtech.hr.ui.BaseView;
 import com.vaadin.addon.touchkit.ui.VerticalComponentGroup;
 import com.vaadin.server.StreamResource;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.Upload.Receiver;
@@ -31,8 +35,10 @@ public class TemplateUpload extends BaseView {
 
 	@Inject
 	public TemplateUpload(
-			final SerializableProvider<JpaHelper> jpaHelperProvider) {
+			final SerializableProvider<JpaHelper> jpaHelperProvider,
+			final SerializableProvider<TemplateManager> templateManagerProvider) {
 		this.jpaHelperProvider = checkNotNull(jpaHelperProvider);
+		checkNotNull(templateManagerProvider);
 		getNavigationBar().setCaption("Edit template");
 
 		VerticalComponentGroup container = new VerticalComponentGroup();
@@ -46,6 +52,14 @@ public class TemplateUpload extends BaseView {
 
 		container.addComponent(download = new Link());
 		download.setCaption("Download");
+		container.addComponent(new Button("Set as active", new ClickListener() {
+			@Override
+			public void buttonClick(ClickEvent event) {
+				templateManagerProvider.get().setActiveTemplate(
+						template.getName());
+				back();
+			}
+		}));
 	}
 
 	public void edit(final Template template) {

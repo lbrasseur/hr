@@ -8,8 +8,10 @@ import javax.persistence.Persistence;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import com.aajtech.hr.business.api.PreferencesManager;
 import com.aajtech.hr.business.api.TemplateManager;
 import com.aajtech.hr.business.api.UserManager;
+import com.aajtech.hr.business.impl.PreferencesManagerImpl;
 import com.aajtech.hr.business.impl.TemplateManagerImpl;
 import com.aajtech.hr.business.impl.UserManagerImpl;
 import com.aajtech.hr.data.api.JpaHelper;
@@ -51,8 +53,9 @@ public class Module extends AbstractModule {
 		bind(NavigationManager.class).in(SessionScoped.class);
 
 		// Business
-		bind(UserManager.class).to(UserManagerImpl.class);
+		bind(PreferencesManager.class).to(PreferencesManagerImpl.class);
 		bind(TemplateManager.class).to(TemplateManagerImpl.class);
+		bind(UserManager.class).to(UserManagerImpl.class);
 
 		// Data
 		bind(JpaHelper.class).to(JpaHelperImpl.class);

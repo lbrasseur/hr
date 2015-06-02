@@ -1,6 +1,7 @@
 package com.aajtech.hr.business.impl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -17,6 +18,7 @@ import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 
+import com.aajtech.hr.business.api.PreferencesManager;
 import com.aajtech.hr.business.api.TemplateManager;
 import com.aajtech.hr.data.api.JpaHelper;
 import com.aajtech.hr.data.api.JpaHelper.JpaCallback;
@@ -25,10 +27,36 @@ import com.aajtech.hr.model.User;
 
 public class TemplateManagerImpl implements TemplateManager {
 	private final JpaHelper jpaHelper;
+	private final PreferencesManager preferencesManager;
 
 	@Inject
-	public TemplateManagerImpl(JpaHelper jpaHelper) {
+	public TemplateManagerImpl(JpaHelper jpaHelper,
+			PreferencesManager preferencesManager) {
 		this.jpaHelper = checkNotNull(jpaHelper);
+		this.preferencesManager = checkNotNull(preferencesManager);
+	}
+
+	@Override
+	public boolean isActiveTemplate() {
+		return jpaHelper.doInJpa(new JpaCallback<Boolean>() {
+			@Override
+			public Boolean call(EntityManager entityManager) throws IOException {
+				return preferencesManager
+						.getValue(PreferencesManager.ACTIVE_TEMPLATE_KEY) != null;
+			}
+		});
+	}
+
+	@Override
+	public void setActiveTemplate(final String name) {
+		jpaHelper.doInJpa(new JpaCallback<Void>() {
+			@Override
+			public Void call(EntityManager entityManager) throws IOException {
+				preferencesManager.setValue(
+						PreferencesManager.ACTIVE_TEMPLATE_KEY, name);
+				return null;
+			}
+		});
 	}
 
 	@Override
@@ -36,10 +64,12 @@ public class TemplateManagerImpl implements TemplateManager {
 		return jpaHelper.doInJpa(new JpaCallback<byte[]>() {
 			@Override
 			public byte[] call(EntityManager entityManager) throws IOException {
-				// TODO: marcar un template como template por defecto o algo asi
-				Template template = entityManager
-						.createQuery("select t from Template t", Template.class)
-						.getResultList().get(0);
+				Template template = entityManager.find(
+						Template.class,
+						preferencesManager
+								.getValue(PreferencesManager.ACTIVE_TEMPLATE_KEY));
+
+				checkState(template != null, "There is no active template");
 
 				XWPFDocument doc = new XWPFDocument(new ByteArrayInputStream(
 						template.getFile()));
@@ -65,7 +95,6 @@ public class TemplateManagerImpl implements TemplateManager {
 				return baos.toByteArray();
 			}
 		});
-
 	}
 
 	private void replaceUserData(List<XWPFRun> runs, User user) {
