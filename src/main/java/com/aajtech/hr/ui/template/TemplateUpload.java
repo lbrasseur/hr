@@ -90,10 +90,10 @@ public class TemplateUpload extends BaseView {
 				@Override
 				public Void call(EntityManager entityManager) throws Exception {
 					entityManager.merge(template);
-					back();
 					return null;
 				}
 			});
+			back();
 		}
 	}
 }

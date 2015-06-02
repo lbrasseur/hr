@@ -20,6 +20,7 @@ import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 
 public class HttpClientLinkedInService implements LinkedInService {
@@ -45,7 +46,9 @@ public class HttpClientLinkedInService implements LinkedInService {
 	public String buildLoginUrl() {
 		String state = UUID.randomUUID().toString();
 		sessionProvider.get().setAttribute(CallbackServlet.STATE_KEY, state);
-		AuthorizationCodeRequestUrl authorizeUrl = flow.newAuthorizationUrl()
+		AuthorizationCodeRequestUrl authorizeUrl = flow
+				.newAuthorizationUrl()
+				.setScopes(ImmutableList.of("r_emailaddress", "r_basicprofile"))
 				.setState(state).setRedirectUri(redirectUrlProvider.get());
 
 		return authorizeUrl.build();
@@ -56,7 +59,7 @@ public class HttpClientLinkedInService implements LinkedInService {
 		final Credential credential = new Credential(flow.getMethod());
 		credential.setAccessToken(accessToken);
 		return get(
-				"https://api.linkedin.com/v1/people/~:(id,first-name,last-name,headline,summary,email-address)?format=json",
+				"https://api.linkedin.com/v1/people/~:(id,first-name,last-name,headline,summary,email-address,specialties,skills)?format=json",
 				UserDto.class, credential);
 	}
 
@@ -73,7 +76,9 @@ public class HttpClientLinkedInService implements LinkedInService {
 			HttpResponse httpResponse = httpTransport
 					.createRequestFactory(credential)
 					.buildGetRequest(new GenericUrl(url)).execute();
-			return gson.fromJson(httpResponse.parseAsString(), responseType);
+			String json = httpResponse.parseAsString();
+			System.out.println(json);
+			return gson.fromJson(json, responseType);
 		} catch (IOException e) {
 			throw Throwables.propagate(e);
 		}

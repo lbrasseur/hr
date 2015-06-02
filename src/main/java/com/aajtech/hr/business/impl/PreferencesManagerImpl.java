@@ -45,10 +45,7 @@ public class PreferencesManagerImpl implements PreferencesManager {
 					preference.setValue(value);
 					entityManager.merge(preference);
 				} else {
-					preference = new Preference();
-					preference.setKey(key);
-					preference.setValue(value);
-					entityManager.persist(preference);
+					entityManager.persist(new Preference(key, value));
 				}
 				return null;
 			}

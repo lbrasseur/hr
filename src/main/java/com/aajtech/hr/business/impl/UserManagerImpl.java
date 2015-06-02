@@ -10,9 +10,14 @@ import com.aajtech.hr.business.api.UserManager;
 import com.aajtech.hr.data.api.JpaHelper;
 import com.aajtech.hr.data.api.JpaHelper.JpaCallback;
 import com.aajtech.hr.ioc.Annotations.UserId;
+import com.aajtech.hr.model.Skill;
 import com.aajtech.hr.model.User;
+import com.aajtech.hr.model.UserSkill;
 import com.aajtech.hr.service.api.LinkedInService;
+import com.aajtech.hr.service.api.SkillIdDto;
 import com.aajtech.hr.service.api.UserDto;
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 
 public class UserManagerImpl implements UserManager {
 	private final JpaHelper jpaHelper;
@@ -46,15 +51,35 @@ public class UserManagerImpl implements UserManager {
 				UserDto userDto = linkedInService.people(accessToken);
 				User user = entityManager.find(User.class, userDto.getId());
 				if (user == null) {
-					user = new User();
-					user.setId(userDto.getId());
+					user = new User(userDto.getId());
 				}
 				user.setFirstName(userDto.getFirstName());
 				user.setLastName(userDto.getLastName());
 				user.setHeadline(userDto.getHeadline());
 				user.setSummary(userDto.getSummary());
 				user.setEmail(userDto.getEmailAddress());
-				entityManager.persist(user);
+				user.setSpecialities(userDto.getSpecialties());
+
+				/*
+				user.getSkills().clear();
+				Iterable<String> skills = Iterables.transform(
+						userDto.getSkills().getValues(),
+						new Function<SkillIdDto, String>() {
+							@Override
+							public String apply(SkillIdDto skill) {
+								return skill.getSkill().getName();
+							}
+						});
+				for (String skillName : skills) {
+					Skill skill = entityManager.find(Skill.class, skillName);
+					if (skill == null) {
+						skill = new Skill(skillName);
+						entityManager.persist(skill);
+					}
+					user.getSkills().add(new UserSkill(user, skill));
+				}
+				*/
+				entityManager.merge(user);
 				return userDto.getId();
 			}
 		});

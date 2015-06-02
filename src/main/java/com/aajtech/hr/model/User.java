@@ -1,12 +1,18 @@
 package com.aajtech.hr.model;
 
-import java.io.Serializable;
-import java.util.Objects;
+import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Lob;
+import javax.persistence.OneToMany;
 
 @Entity
 public class User implements Serializable {
@@ -26,13 +32,26 @@ public class User implements Serializable {
 	@Column
 	@Lob
 	private String summary = "";
-	
+
 	@Column
 	private String email = "";
-	
+
+	@Column
+	private String specialities = "";
+
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
+	private Set<UserSkill> skills;
+
 	@Column
 	private boolean admin;
-	
+
+	public User() {
+	}
+
+	public User(String id) {
+		this.id = checkNotNull(id);
+		skills = new HashSet<UserSkill>();
+	}
 
 	public String getId() {
 		return id;
@@ -90,11 +109,23 @@ public class User implements Serializable {
 		this.admin = admin;
 	}
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(id, firstName, lastName, email, headline);
+	public String getSpecialities() {
+		return specialities;
 	}
 
+	public void setSpecialities(String specialities) {
+		this.specialities = specialities;
+	}
+
+	public Set<UserSkill> getSkills() {
+		return skills;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id, firstName, lastName, email, headline,
+				specialities, admin);
+	}
 
 	@Override
 	public boolean equals(Object o) {
@@ -110,12 +141,15 @@ public class User implements Serializable {
 				&& Objects.equals(lastName, that.lastName)
 				&& Objects.equals(email, that.email)
 				&& Objects.equals(summary, that.summary)
-				&& Objects.equals(headline, that.headline);
+				&& Objects.equals(headline, that.headline)
+				&& Objects.equals(specialities, that.specialities)
+				&& Objects.equals(admin, that.admin)
+				&& Objects.equals(skills, that.skills);
 	}
 
 	@Override
 	public String toString() {
-		return "Person [id=" + id + ", firstName=" + firstName + ", lastName="
+		return "User [id=" + id + ", firstName=" + firstName + ", lastName="
 				+ lastName + ", email=" + email + "]";
 	}
 }

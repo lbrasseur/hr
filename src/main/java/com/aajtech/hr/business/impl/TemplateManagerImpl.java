@@ -98,6 +98,8 @@ public class TemplateManagerImpl implements TemplateManager {
 	}
 
 	private void replaceUserData(List<XWPFRun> runs, User user) {
+		findAndReplace(runs, "[firstName]", user.getFirstName());
+		findAndReplace(runs, "[lastName]", user.getLastName());
 		findAndReplace(runs, "[headline]", user.getHeadline());
 		findAndReplace(runs, "[summary]", user.getSummary());
 	}
