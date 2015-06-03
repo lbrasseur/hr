@@ -102,6 +102,7 @@ public class TemplateManagerImpl implements TemplateManager {
 		findAndReplace(runs, "[lastName]", user.getLastName());
 		findAndReplace(runs, "[headline]", user.getHeadline());
 		findAndReplace(runs, "[summary]", user.getSummary());
+		findAndReplace(runs, "[specialities]", user.getSpecialities());
 	}
 
 	private void findAndReplace(List<XWPFRun> runs, String template,

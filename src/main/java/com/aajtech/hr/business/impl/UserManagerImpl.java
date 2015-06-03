@@ -60,25 +60,26 @@ public class UserManagerImpl implements UserManager {
 				user.setEmail(userDto.getEmailAddress());
 				user.setSpecialities(userDto.getSpecialties());
 
-				/*
-				user.getSkills().clear();
-				Iterable<String> skills = Iterables.transform(
-						userDto.getSkills().getValues(),
-						new Function<SkillIdDto, String>() {
-							@Override
-							public String apply(SkillIdDto skill) {
-								return skill.getSkill().getName();
-							}
-						});
-				for (String skillName : skills) {
-					Skill skill = entityManager.find(Skill.class, skillName);
-					if (skill == null) {
-						skill = new Skill(skillName);
-						entityManager.persist(skill);
+				if (userDto.getSkills() != null) {
+					user.getSkills().clear();
+					Iterable<String> skills = Iterables.transform(userDto
+							.getSkills().getValues(),
+							new Function<SkillIdDto, String>() {
+								@Override
+								public String apply(SkillIdDto skill) {
+									return skill.getSkill().getName();
+								}
+							});
+					for (String skillName : skills) {
+						Skill skill = entityManager
+								.find(Skill.class, skillName);
+						if (skill == null) {
+							skill = new Skill(skillName);
+							entityManager.persist(skill);
+						}
+						user.getSkills().add(new UserSkill(user, skill));
 					}
-					user.getSkills().add(new UserSkill(user, skill));
 				}
-				*/
 				entityManager.merge(user);
 				return userDto.getId();
 			}
