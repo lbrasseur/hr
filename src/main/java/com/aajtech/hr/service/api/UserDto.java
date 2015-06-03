@@ -1,6 +1,5 @@
 package com.aajtech.hr.service.api;
 
-
 public class UserDto {
 	private String id;
 	private String firstName;
@@ -10,6 +9,7 @@ public class UserDto {
 	private String emailAddress;
 	private String specialties;
 	private SkillsDto skills;
+	private PositionsDto positions;
 
 	public String getId() {
 		return id;
@@ -41,5 +41,9 @@ public class UserDto {
 
 	public SkillsDto getSkills() {
 		return skills;
+	}
+
+	public PositionsDto getPositions() {
+		return positions;
 	}
 }

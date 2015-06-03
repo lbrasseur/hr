@@ -11,7 +11,6 @@ public class UserSkill {
 	@Id
 	@ManyToOne
 	private User user;
-
 	@Id
 	@ManyToOne
 	private Skill skill;

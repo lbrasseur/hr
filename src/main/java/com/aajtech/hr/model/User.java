@@ -18,30 +18,24 @@ import javax.persistence.OneToMany;
 public class User implements Serializable {
 	@Id
 	private String id;
-
 	@Column
 	private String firstName = "";
-
 	@Column
 	private String lastName = "";
-
 	@Column
 	@Lob
 	private String headline = "";
-
 	@Column
 	@Lob
 	private String summary = "";
-
 	@Column
 	private String email = "";
-
 	@Column
 	private String specialities = "";
-
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
 	private Set<UserSkill> skills;
-
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
+	private Set<Position> positions;
 	@Column
 	private boolean admin;
 
@@ -51,6 +45,7 @@ public class User implements Serializable {
 	public User(String id) {
 		this.id = checkNotNull(id);
 		skills = new HashSet<UserSkill>();
+		positions = new HashSet<Position>();
 	}
 
 	public String getId() {
@@ -121,10 +116,14 @@ public class User implements Serializable {
 		return skills;
 	}
 
+	public Set<Position> getPositions() {
+		return positions;
+	}
+
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, firstName, lastName, email, headline,
-				specialities, admin);
+		return Objects.hash(id, firstName, lastName, email, headline, summary,
+				specialities, admin, skills, positions);
 	}
 
 	@Override
@@ -144,7 +143,8 @@ public class User implements Serializable {
 				&& Objects.equals(headline, that.headline)
 				&& Objects.equals(specialities, that.specialities)
 				&& Objects.equals(admin, that.admin)
-				&& Objects.equals(skills, that.skills);
+				&& Objects.equals(skills, that.skills)
+				&& Objects.equals(positions, that.positions);
 	}
 
 	@Override

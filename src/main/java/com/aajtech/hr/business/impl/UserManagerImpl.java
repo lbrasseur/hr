@@ -10,10 +10,14 @@ import com.aajtech.hr.business.api.UserManager;
 import com.aajtech.hr.data.api.JpaHelper;
 import com.aajtech.hr.data.api.JpaHelper.JpaCallback;
 import com.aajtech.hr.ioc.Annotations.UserId;
+import com.aajtech.hr.model.Company;
+import com.aajtech.hr.model.Position;
 import com.aajtech.hr.model.Skill;
 import com.aajtech.hr.model.User;
 import com.aajtech.hr.model.UserSkill;
+import com.aajtech.hr.service.api.CompanyDto;
 import com.aajtech.hr.service.api.LinkedInService;
+import com.aajtech.hr.service.api.PositionDto;
 import com.aajtech.hr.service.api.SkillIdDto;
 import com.aajtech.hr.service.api.UserDto;
 import com.google.common.base.Function;
@@ -79,6 +83,27 @@ public class UserManagerImpl implements UserManager {
 						}
 						user.getSkills().add(new UserSkill(user, skill));
 					}
+				}
+				user.getPositions().clear();
+				for (PositionDto positionDto : userDto.getPositions()
+						.getValues()) {
+					CompanyDto companyDto = positionDto.getCompany();
+					Company company = entityManager.find(Company.class,
+							companyDto.getId());
+					if (company == null) {
+						company = new Company(companyDto.getId());
+					}
+					company.setName(companyDto.getName());
+					company.setIndustry(companyDto.getIndustry());
+					company.setSize(companyDto.getSize());
+					company.setType(companyDto.getType());
+					entityManager.merge(company);
+
+					user.getPositions().add(
+							new Position(user, company, positionDto
+									.getStartDate(), positionDto.getEndDate(),
+									positionDto.getTitle(), positionDto
+											.getSummary()));
 				}
 				entityManager.merge(user);
 				return userDto.getId();

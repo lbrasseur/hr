@@ -13,7 +13,6 @@ import javax.persistence.Lob;
 public class Template implements Serializable {
 	@Id
 	private String name = "";
-
 	@Lob
 	private byte[] file;
 

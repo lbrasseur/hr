@@ -59,7 +59,7 @@ public class HttpClientLinkedInService implements LinkedInService {
 		final Credential credential = new Credential(flow.getMethod());
 		credential.setAccessToken(accessToken);
 		return get(
-				"https://api.linkedin.com/v1/people/~:(id,first-name,last-name,headline,summary,email-address,specialties,skills)?format=json",
+				"https://api.linkedin.com/v1/people/~:(id,first-name,last-name,headline,summary,email-address,specialties,skills,positions)?format=json",
 				UserDto.class, credential);
 	}
 
