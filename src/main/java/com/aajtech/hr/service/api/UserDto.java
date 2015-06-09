@@ -1,5 +1,7 @@
 package com.aajtech.hr.service.api;
 
+import com.google.common.collect.Iterables;
+
 public class UserDto {
 	private String id;
 	private String firstName;
@@ -41,6 +43,10 @@ public class UserDto {
 
 	public SkillsDto getSkills() {
 		return skills;
+	}
+
+	public Iterable<String> getSkillsNames() {
+		return Iterables.transform(skills.getValues(), SkillIdDto.TO_NAME);
 	}
 
 	public PositionsDto getPositions() {

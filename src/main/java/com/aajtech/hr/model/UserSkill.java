@@ -2,28 +2,30 @@ package com.aajtech.hr.model;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+
+import com.google.appengine.api.datastore.Key;
 
 @Entity
 public class UserSkill {
 	@Id
-	@ManyToOne
-	private User user;
-	@Id
-	@ManyToOne
-	private Skill skill;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Key id;
+	@Column
+	private String skillName;
 
 	public UserSkill() {
 	}
 
-	public UserSkill(User user, Skill skill) {
-		this.user = checkNotNull(user);
-		this.skill = checkNotNull(skill);
+	public UserSkill(String skillName) {
+		this.skillName = checkNotNull(skillName);
 	}
 
-	public Skill getSkill() {
-		return skill;
+	public String getSkillName() {
+		return skillName;
 	}
 }

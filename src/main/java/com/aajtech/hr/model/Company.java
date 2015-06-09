@@ -11,8 +11,6 @@ import javax.persistence.Id;
 @Entity
 public class Company {
 	@Id
-	private Long id;
-	@Column
 	private String name;
 	@Column
 	private String industry;
@@ -24,8 +22,8 @@ public class Company {
 	public Company() {
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public Company(String name) {
+		this.name = checkNotNull(name);
 	}
 
 	public void setIndustry(String industry) {
@@ -38,14 +36,6 @@ public class Company {
 
 	public void setType(String type) {
 		this.type = type;
-	}
-
-	public Company(Long id) {
-		this.id = checkNotNull(id);
-	}
-
-	public Long getId() {
-		return id;
 	}
 
 	public String getIndustry() {
@@ -66,7 +56,7 @@ public class Company {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, name, industry, size, type);
+		return Objects.hash(name, industry, size, type);
 	}
 
 	@Override
@@ -78,7 +68,7 @@ public class Company {
 			return false;
 		}
 		Company that = (Company) o;
-		return Objects.equals(id, that.id) && Objects.equals(name, that.name)
+		return Objects.equals(name, that.name)
 				&& Objects.equals(industry, that.industry)
 				&& Objects.equals(size, that.size)
 				&& Objects.equals(type, that.type);

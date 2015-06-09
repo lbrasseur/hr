@@ -18,10 +18,7 @@ import com.aajtech.hr.model.UserSkill;
 import com.aajtech.hr.service.api.CompanyDto;
 import com.aajtech.hr.service.api.LinkedInService;
 import com.aajtech.hr.service.api.PositionDto;
-import com.aajtech.hr.service.api.SkillIdDto;
 import com.aajtech.hr.service.api.UserDto;
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
 
 public class UserManagerImpl implements UserManager {
 	private final JpaHelper jpaHelper;
@@ -49,10 +46,41 @@ public class UserManagerImpl implements UserManager {
 
 	@Override
 	public String updateUserData(final String accessToken) {
+		final UserDto userDto = linkedInService.people(accessToken);
+		if (userDto.getSkills() != null) {
+			for (final String skillName : userDto.getSkillsNames()) {
+				jpaHelper.doInJpa(new JpaCallback<Void>() {
+					@Override
+					public Void call(EntityManager entityManager) {
+						if (entityManager.find(Skill.class, skillName) == null) {
+							entityManager.persist(new Skill(skillName));
+						}
+						return null;
+					}
+				});
+			}
+		}
+		for (PositionDto positionDto : userDto.getPositions().getValues()) {
+			final CompanyDto companyDto = positionDto.getCompany();
+			jpaHelper.doInJpa(new JpaCallback<Void>() {
+				@Override
+				public Void call(EntityManager entityManager) {
+					Company company = entityManager.find(Company.class,
+							companyDto.getName());
+					if (company == null) {
+						company = new Company(companyDto.getName());
+					}
+					company.setIndustry(companyDto.getIndustry());
+					company.setSize(companyDto.getSize());
+					company.setType(companyDto.getType());
+					entityManager.persist(company);
+					return null;
+				}
+			});
+		}
 		return jpaHelper.doInJpa(new JpaCallback<String>() {
 			@Override
 			public String call(EntityManager entityManager) {
-				UserDto userDto = linkedInService.people(accessToken);
 				User user = entityManager.find(User.class, userDto.getId());
 				if (user == null) {
 					user = new User(userDto.getId());
@@ -66,46 +94,21 @@ public class UserManagerImpl implements UserManager {
 
 				if (userDto.getSkills() != null) {
 					user.getSkills().clear();
-					Iterable<String> skills = Iterables.transform(userDto
-							.getSkills().getValues(),
-							new Function<SkillIdDto, String>() {
-								@Override
-								public String apply(SkillIdDto skill) {
-									return skill.getSkill().getName();
-								}
-							});
-					for (String skillName : skills) {
-						Skill skill = entityManager
-								.find(Skill.class, skillName);
-						if (skill == null) {
-							skill = new Skill(skillName);
-							entityManager.persist(skill);
-						}
-						user.getSkills().add(new UserSkill(user, skill));
+					for (String skillName : userDto.getSkillsNames()) {
+						user.getSkills().add(new UserSkill(skillName));
 					}
 				}
 				user.getPositions().clear();
 				for (PositionDto positionDto : userDto.getPositions()
 						.getValues()) {
-					CompanyDto companyDto = positionDto.getCompany();
-					Company company = entityManager.find(Company.class,
-							companyDto.getId());
-					if (company == null) {
-						company = new Company(companyDto.getId());
-					}
-					company.setName(companyDto.getName());
-					company.setIndustry(companyDto.getIndustry());
-					company.setSize(companyDto.getSize());
-					company.setType(companyDto.getType());
-					entityManager.merge(company);
-
 					user.getPositions().add(
-							new Position(user, company, positionDto
-									.getStartDate(), positionDto.getEndDate(),
-									positionDto.getTitle(), positionDto
+							new Position(positionDto.getCompany().getName(),
+									positionDto.getStartDate(), positionDto
+											.getEndDate(), positionDto
+											.getTitle(), positionDto
 											.getSummary()));
 				}
-				entityManager.merge(user);
+				entityManager.persist(user);
 				return userDto.getId();
 			}
 		});

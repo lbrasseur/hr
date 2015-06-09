@@ -11,21 +11,16 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.datanucleus.annotations.Unowned;
 
 @Entity
 public class Position {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Key id;
-	@ManyToOne
-	private User user;
-	@ManyToOne
-	@Unowned
-	private Company company;
+	@Column
+	private String companyName;
 	@Column
 	private Date startDate;
 	@Column
@@ -38,18 +33,17 @@ public class Position {
 	public Position() {
 	}
 
-	public Position(User user, Company company, Date startDate,
-			@Nullable Date endDate, String title, String summary) {
-		this.user = checkNotNull(user);
-		this.company = checkNotNull(company);
+	public Position(String companyName, Date startDate,
+			@Nullable Date endDate, String title, @Nullable String summary) {
+		this.companyName = checkNotNull(companyName);
 		this.startDate = checkNotNull(startDate);
 		this.endDate = endDate;
 		this.title = checkNotNull(title);
-		this.summary = checkNotNull(summary);
+		this.summary = summary;
 	}
 
-	public Company getCompany() {
-		return company;
+	public String getCompanyName() {
+		return companyName;
 	}
 
 	public Date getStartDate() {
@@ -70,7 +64,7 @@ public class Position {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, company, startDate, endDate, title, summary);
+		return Objects.hash(id, companyName, startDate, endDate, title, summary);
 	}
 
 	@Override
@@ -83,7 +77,7 @@ public class Position {
 		}
 		Position that = (Position) o;
 		return Objects.equals(id, that.id)
-				&& Objects.equals(company, that.company)
+				&& Objects.equals(companyName, that.companyName)
 				&& Objects.equals(startDate, that.startDate)
 				&& Objects.equals(endDate, that.endDate)
 				&& Objects.equals(title, that.title)

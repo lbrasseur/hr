@@ -32,9 +32,9 @@ public class User implements Serializable {
 	private String email = "";
 	@Column
 	private String specialities = "";
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
+	@OneToMany(cascade = CascadeType.ALL)
 	private Set<UserSkill> skills;
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
+	@OneToMany(cascade = CascadeType.ALL)
 	private Set<Position> positions;
 	@Column
 	private boolean admin;
