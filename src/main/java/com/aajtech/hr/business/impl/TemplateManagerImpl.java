@@ -7,17 +7,11 @@ import groovy.lang.GroovyShell;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.List;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.poi.xwpf.usermodel.XWPFParagraph;
-import org.apache.poi.xwpf.usermodel.XWPFRun;
-import org.apache.poi.xwpf.usermodel.XWPFTable;
-import org.apache.poi.xwpf.usermodel.XWPFTableCell;
-import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 
 import com.aajtech.hr.business.api.PreferencesManager;
 import com.aajtech.hr.business.api.TemplateManager;
@@ -25,6 +19,7 @@ import com.aajtech.hr.data.api.JpaHelper;
 import com.aajtech.hr.data.api.JpaHelper.JpaCallback;
 import com.aajtech.hr.model.Template;
 import com.aajtech.hr.model.User;
+import com.google.common.base.Optional;
 
 public class TemplateManagerImpl implements TemplateManager {
 	private final JpaHelper jpaHelper;
@@ -74,22 +69,7 @@ public class TemplateManagerImpl implements TemplateManager {
 
 				XWPFDocument doc = new XWPFDocument(new ByteArrayInputStream(
 						template.getFile()));
-
-				for (XWPFParagraph p : doc.getParagraphs()) {
-					List<XWPFRun> runs = p.getRuns();
-					if (runs != null) {
-						replaceUserData(runs, user);
-					}
-				}
-				for (XWPFTable tbl : doc.getTables()) {
-					for (XWPFTableRow row : tbl.getRows()) {
-						for (XWPFTableCell cell : row.getTableCells()) {
-							for (XWPFParagraph p : cell.getParagraphs()) {
-								replaceUserData(p.getRuns(), user);
-							}
-						}
-					}
-				}
+				replaceUserData(doc, user);
 
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				doc.write(baos);
@@ -98,27 +78,40 @@ public class TemplateManagerImpl implements TemplateManager {
 		});
 	}
 
-	private void replaceUserData(List<XWPFRun> runs, User user) {
+	private void replaceUserData(XWPFDocument doc, User user) {
 		GroovyShell groovyShell = new GroovyShell();
 		groovyShell.setVariable("user", user);
 
-		RunPointer start = new RunPointer(runs);
+		DocPointer start = new DocPointer(doc, 0, 0, 0);
+		// Paragrpah 0 is not valid
+		while (!start.isValid()) {
+			start.increase();
+		}
 		while (start.isValid()) {
 			while (start.isValid() && start.getChar() != '{') {
 				start.increase();
 			}
 			if (start.isValid()) {
-				RunPointer end = start.clone();
-				end.increase();
-				while (end.isValid() && end.getChar() != '}') {
+				DocPointer end = start.clone();
+				int nestCount = 1;
+				while (end.isValid() && nestCount > 0) {
 					end.increase();
+					if (end.isValid()) {
+						if (end.getChar() == '{') {
+							nestCount++;
+						} else if (end.getChar() == '}') {
+							nestCount--;
+						}
+					}
 				}
 				if (end.isValid()) {
 					String scriptText = start.clone().increase().getString(end);
-					String value = groovyShell.evaluate(scriptText).toString();
+					String value = Optional
+							.of(groovyShell.evaluate(scriptText)).or("")
+							.toString();
 					start.replace(end.clone().increase(), value);
 					start = end.increase();
-				} else{
+				} else {
 					break;
 				}
 			}
