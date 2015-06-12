@@ -20,6 +20,7 @@ import com.aajtech.hr.data.api.JpaHelper.JpaCallback;
 import com.aajtech.hr.model.Template;
 import com.aajtech.hr.model.User;
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 
 public class TemplateManagerImpl implements TemplateManager {
 	private final JpaHelper jpaHelper;
@@ -105,11 +106,18 @@ public class TemplateManagerImpl implements TemplateManager {
 					}
 				}
 				if (end.isValid()) {
-					String scriptText = start.clone().increase().getString(end);
+					Content content = new Content(doc);
+					groovyShell.setVariable("content", content);
+					String scriptText = start.clone().increase().getString(end)
+							.replaceAll("“", "\"").replaceAll("”", "\"")
+							.replaceAll("‘", "\'").replaceAll("’", "\'");
 					String value = Optional
 							.of(groovyShell.evaluate(scriptText)).or("")
 							.toString();
-					start.replace(end.clone().increase(), value);
+					if (!Strings.isNullOrEmpty(value)) {
+						content.add(value);
+					}
+					start.replace(end.clone().increase(), content.toString());
 					start = end.increase();
 				} else {
 					break;
