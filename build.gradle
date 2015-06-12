@@ -105,6 +105,13 @@ tasks.eclipse.doLast {
 	tasks.copyRuntimeLibs.execute()
 }
 
+eclipse.classpath.file {
+    whenMerged { classpath ->
+        classpath.entries.findAll { entry -> entry.kind == 'output' }*.path = "src/main/webapp/WEB-INF/classes"
+    }
+}
+
+
 task copyRuntimeLibs(type: Copy) {
     into "src/main/webapp/WEB-INF/lib"
     from configurations.compile

@@ -16,6 +16,7 @@ import javax.persistence.OneToMany;
 
 @Entity
 public class User implements Serializable {
+	public static final String DEFAULT_ADMIN = "vPwxCoFLC8";
 	@Id
 	private String id;
 	@Column
@@ -97,7 +98,7 @@ public class User implements Serializable {
 	}
 
 	public boolean isAdmin() {
-		return admin || "vPwxCoFLC8".equals(id);
+		return admin || DEFAULT_ADMIN.equals(id);
 	}
 
 	public void setAdmin(boolean admin) {
